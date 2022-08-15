@@ -62,3 +62,11 @@ def load_data():
     data_list=np.array(data_list)
     x_train,x_test,y_train,y_test=train_test_split(data_list,labels,test_size=0.2,random_state=0)
     return x_train,x_test,y_train,y_test
+
+x_train,x_test,y_train,y_test = load_data()
+
+model = RandomForestClassifier()
+model.fit(x_train,y_train)
+y_pred=model.predict(x_test)
+accuracy = accuracy_score(y_test,y_pred)
+print("accuracy:{:.2f}".format(accuracy*100))
