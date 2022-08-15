@@ -25,3 +25,40 @@ def detect_lips(img):
     mouth_right=out["keypoints"]['mouth_right'][0]
     img = img[nose:y+h,mouth_left:mouth_right]
     return img
+
+def load_data():
+    data_list= []
+    labels=[]
+
+    for i,address in enumerate(glob.glob("smile_dataset\\*\\*")): 
+        try:
+            img = cv2.imread(address)
+            img = detect_lips(img)
+            if img is None:
+                continue
+            m,n,c= img.shape
+            img_r=np.reshape(img,(m,n*c))
+            pca=PCA(n_components=5).fit(img_r)
+            img_r=pca.transform(img_r)       
+            img_r=img_r.flatten()
+            x=img_r.size
+            c=x//5
+            img_r=np.reshape(img_r,(5,c))
+            pca=PCA(n_components=5).fit(img_r)
+            img_r=pca.transform(img_r)
+            x= img_r.max()
+            img_r=img_r/x
+            img_r=img_r.flatten()
+            
+            data_list.append(img_r)
+
+            label = address.split("\\")[1]
+            labels.append(label)
+            if i%100 == 0:
+                print("statue: {}/3900 processed".format(i))
+        except:
+            print("Error")
+            continue
+    data_list=np.array(data_list)
+    x_train,x_test,y_train,y_test=train_test_split(data_list,labels,test_size=0.2,random_state=0)
+    return x_train,x_test,y_train,y_test
